@@ -19,15 +19,30 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
+    <html lang="fr">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-100 text-slate-800`}
       >
-        {children}
+        {/* HEADER */}
+        <header className="bg-purple-200 py-4 px-6 shadow-md text-center">
+          <h1 className="text-purple-900 font-semibold text-xl md:text-2xl">
+            B2LP - le blog de Lyon Palme
+          </h1>
+        </header>
+
+        {/* CONTENU PRINCIPAL */}
+        <main className="max-w-4xl mx-auto py-10 px-4">
+          {children}
+        </main>
+
+        {/* FOOTER */}
+        <footer className="bg-purple-100 text-center py-4 mt-10 text-2xl text-purple-700">
+          Développé avec ❤️ par les SIO2 - © 2026
+        </footer>
       </body>
     </html>
   );

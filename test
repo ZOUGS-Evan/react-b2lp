@@ -1,3 +1,4 @@
+/*
 // Import de Link depuis Next.js pour créer des liens de navigation internes
 import Link from "next/link";
 
@@ -39,24 +40,17 @@ async function fetchBillets(): Promise<Billet[]> {
   return data as Billet[];
 }
 
-// Composant principal de la page (export par défaut pour Next.js App Router)
-// Fonction asynchrone car elle utilise await pour fetchBillets
+// Composant principal de la page
 export default async function BilletsPage() {
-  // Variables pour stocker les données et les erreurs
-  let billets: Billet[] = []; // Tableau des billets récupérés
-  let errorMessage: string | null = null; // Message d'erreur si la récupération échoue
+  let billets: Billet[] = [];
+  let errorMessage: string | null = null;
 
-  // Bloc try-catch pour gérer les erreurs de récupération
   try {
-    // Appelle la fonction pour récupérer les billets
     billets = await fetchBillets();
   } catch (error) {
-    // En cas d'erreur, stocke le message d'erreur
     errorMessage = (error as Error).message;
   }
 
-  
-  // Retourne le JSX de la page
   return (
     <main className="min-h-screen px-4 py-10">
       <div className="mx-auto max-w-4xl">
@@ -66,7 +60,7 @@ export default async function BilletsPage() {
             Liste des billets
           </h1>
 
-          <p className="mt-2 text-sm text-slate-600 ">
+          <p className="mt-2 text-sm text-slate-600">
             Données récupérées depuis <code>{API_URL}</code>.
           </p>
         </header>
@@ -125,7 +119,17 @@ export default async function BilletsPage() {
 
         )}
 
+        <div className="mt-10">
+          <Link
+            href="/"
+            className="inline-flex items-center text-sm font-medium text-purple-700 hover:text-purple-900"
+          >
+            ← Retour à l’accueil
+          </Link>
+        </div>
+
       </div>
     </main>
   );
 }
+*/
