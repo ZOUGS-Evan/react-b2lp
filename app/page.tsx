@@ -12,7 +12,7 @@ type Billet = {
 
 // URL de l'API pour récupérer les billets
 // Note : pas de slash final pour éviter une redirection 301
-const API_URL = "https://react-b2lp.vercel.app/";
+const API_URL = "https://evanzougs.fr/b2lp/api/billets/";
 
 // Fonction asynchrone pour récupérer les billets depuis l'API
 // Utilise fetch avec cache désactivé pour toujours obtenir les données fraîches
