@@ -12,12 +12,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const Header = () => (
-  <header className="bg-purple-200 py-4 px-6 shadow-md text-center">
-    <h1 className="text-purple-900 font-semibold text-xl md:text-2xl">B2LP - le blog de Lyon Palme</h1>
-  </header>
-)
-
 export const Footer = () => (
   <footer className="bg-purple-100 text-center py-4 mt-10 text-2xl text-purple-700">
     Développé avec ❤️ par les SIO2 - © 2026

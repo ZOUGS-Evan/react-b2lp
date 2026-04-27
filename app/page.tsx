@@ -1,6 +1,8 @@
 // Import de Link depuis Next.js pour créer des liens de navigation internes
-import { Header, Footer} from "./layout";
-import BilletsPage from "./components/billets";
+import { Footer} from "./layout";
+import Header from "@/components/Header";
+import BilletsPage from "@/components/billets";
+
 
 export default function Page() {
   return(
