@@ -21,13 +21,9 @@ export default function LoginPage() {
     try {
       await BilletService.login(email, password);
 
-      // 🔥 important refresh global UI
+      // 🔥 refresh global état auth
       window.location.href = "/";
-
     } catch (err) {
-      // ❌ sécurité : on supprime tout token possible
-      localStorage.removeItem("auth_token");
-
       setError((err as Error).message);
     } finally {
       setLoading(false);
@@ -35,20 +31,20 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center bg-white px-4">
 
       <form onSubmit={handleLogin} className="w-full max-w-md p-8 border rounded-xl">
 
-        <h1 className="text-2xl mb-4">Connexion</h1>
+        <h1 className="text-2xl font-bold mb-4">Connexion</h1>
 
         {error && (
-          <p className="text-red-500 text-sm mb-2">{error}</p>
+          <p className="text-red-500 text-sm mb-3">{error}</p>
         )}
 
         <input
           type="email"
           placeholder="Email"
-          className="w-full p-3 border mb-3"
+          className="w-full p-3 border mb-3 rounded"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -56,7 +52,7 @@ export default function LoginPage() {
         <input
           type="password"
           placeholder="Mot de passe"
-          className="w-full p-3 border mb-3"
+          className="w-full p-3 border mb-3 rounded"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
@@ -69,6 +65,7 @@ export default function LoginPage() {
         </button>
 
       </form>
+
     </div>
   );
 }

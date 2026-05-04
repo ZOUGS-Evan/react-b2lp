@@ -1,6 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { API_BASE_URL, API_ENDPOINTS } from "../../../lib/api-config";
 
+/**
+ * 🔥 Traduction erreurs Laravel → FR
+ */
+function translateError(message: string): string {
+  const map: Record<string, string> = {
+    "The provided credentials are erroneous.": "Email ou mot de passe incorrect",
+    "The password field must be at least 8 characters.": "Mot de passe trop court (8 caractères minimum)",
+    "The email field is required.": "Email requis",
+    "The password field is required.": "Mot de passe requis",
+  };
+
+  return map[message] || "Erreur de connexion";
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -14,35 +28,49 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(body),
     });
 
-    const text = await res.text();
+    const data = await res.json().catch(() => null);
 
-    // ❌ login refusé backend
+    // ❌ ERREUR BACKEND
     if (!res.ok) {
+      const rawMessage =
+        data?.message ||
+        (data?.errors &&
+          Object.values(data.errors).flat()[0]) ||
+        "Erreur inconnue";
+
       return NextResponse.json(
-        { message: text || "Email ou mot de passe incorrect" },
+        {
+          success: false,
+          message: translateError(rawMessage),
+        },
         { status: res.status }
       );
     }
 
-    const token = text.trim();
+    const token = data?.auth_token || data?.trim?.() || data;
 
-    // ❌ validation token Laravel Sanctum
-    if (!token || !token.includes("|")) {
+    if (!token) {
       return NextResponse.json(
-        { message: "Token invalide reçu du serveur" },
+        {
+          success: false,
+          message: "Token invalide",
+        },
         { status: 401 }
       );
     }
 
-    // ✅ réponse propre frontend
-    return NextResponse.json(
-      { auth_token: token },
-      { status: 200 }
-    );
+    // ✅ SUCCESS CLEAN
+    return NextResponse.json({
+      success: true,
+      auth_token: token,
+    });
 
   } catch (error) {
     return NextResponse.json(
-      { message: "Erreur serveur login" },
+      {
+        success: false,
+        message: "Erreur serveur",
+      },
       { status: 500 }
     );
   }
