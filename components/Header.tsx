@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { BilletService } from "@/services/billetService";
 
 export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -9,20 +10,24 @@ export default function Header() {
 
   useEffect(() => {
     const checkLogin = () => {
-      const status = localStorage.getItem("isLoggedIn");
-      setIsLoggedIn(status === "true");
+      const token = localStorage.getItem("auth_token");
+      setIsLoggedIn(!!token);
     };
 
     checkLogin();
+
+    // 🔥 écoute les changements (multi-tab)
     window.addEventListener("storage", checkLogin);
 
     return () => window.removeEventListener("storage", checkLogin);
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
+    BilletService.logout(); // 🔥 supprime le token
     setIsLoggedIn(false);
-    router.push("/");
+
+    // 🔥 reload propre
+    window.location.href = "/";
   };
 
   return (
@@ -45,7 +50,6 @@ export default function Header() {
 
           {isLoggedIn ? (
             <>
-              {/* BADGE CONNECTÉ */}
               <div className="hidden sm:flex items-center gap-2 bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium border border-green-200">
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                 Connecté

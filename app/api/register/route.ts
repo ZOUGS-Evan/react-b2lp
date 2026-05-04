@@ -12,20 +12,23 @@ export async function POST(req: Request) {
       body: JSON.stringify(body),
     });
 
-    // 🔥 important : gérer si le backend renvoie pas du JSON
     const text = await res.text();
 
     let data;
     try {
       data = JSON.parse(text);
     } catch {
-      data = { raw: text };
+      data = { message: text };
     }
 
     return NextResponse.json(data, { status: res.status });
 
   } catch (error) {
-    console.error("Error in /api/register:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    console.error("REGISTER ERROR:", error);
+
+    return NextResponse.json(
+      { message: "Erreur serveur" },
+      { status: 500 }
+    );
   }
 }

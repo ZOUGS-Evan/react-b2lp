@@ -2,92 +2,102 @@ import { API_BASE_URL } from "../lib/api-config";
 
 export class BilletService {
 
-  static async fetchBillets() {
-    const res = await fetch(`${API_BASE_URL}/billets`, {
-      cache: "no-store",
-    });
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch billets (status ${res.status})`);
-    }
-
-    const data = await res.json();
-
-    if (!Array.isArray(data)) {
-      throw new Error(
-        `Unexpected API response (expected array, got ${typeof data})`
-      );
-    }
-
-    return data;
-  }
-
-  static async fetchBilletById(id: number | string) {
-    const res = await fetch(`${API_BASE_URL}/billets/${id}`, {
-      cache: "no-store",
-    });
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch billet (status ${res.status})`);
-    }
-
-    return await res.json();
-  }
-
-  // 🔥 LOGIN corrigé
+  // 🔑 LOGIN (token texte)
   static async login(email: string, password: string) {
     const res = await fetch("/api/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      credentials: "include",
       body: JSON.stringify({ email, password }),
     });
 
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`Failed to login (${res.status}) : ${text}`);
-    }
-
-    const data = await res.json();
-
-    // ✅ AJOUT IMPORTANT
-    localStorage.setItem("isLoggedIn", "true");
-
-    return data;
-  }
-
-  // 🔥 LOGOUT corrigé
-  static async logout() {
-    const res = await fetch("/api/logout", {
-      method: "POST",
-      credentials: "include",
-    });
-
-    // même si erreur backend → on logout côté front
-    localStorage.removeItem("isLoggedIn");
+    const text = await res.text();
 
     if (!res.ok) {
-      throw new Error(`Failed to logout (status ${res.status})`);
+      throw new Error(text || "Erreur login");
     }
 
-    return await res.json();
+    const token = text.trim();
+
+    if (!token) {
+      throw new Error("Token invalide");
+    }
+
+    localStorage.setItem("auth_token", token);
+
+    return token;
   }
 
-  // 🔥 REGISTER corrigé
-  static async register(nom: string, email: string, password: string) {
+  // 📝 REGISTER
+  static async register(name: string, email: string, password: string) {
     const res = await fetch("/api/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ nom, email, password }),
+      body: JSON.stringify({ name, email, password }),
+    });
+
+    const text = await res.text();
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = { message: text };
+    }
+
+    if (!res.ok) {
+      throw new Error(data.message || "Erreur inscription");
+    }
+
+    return data;
+  }
+
+  // 🔐 TOKEN
+  static getToken() {
+    return localStorage.getItem("auth_token");
+  }
+
+  // 🚪 LOGOUT
+  static logout() {
+    localStorage.removeItem("auth_token");
+  }
+
+  // 📄 FETCH BILLETS
+  static async fetchBillets() {
+    const token = this.getToken();
+
+    const res = await fetch(`${API_BASE_URL}/billets`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      cache: "no-store",
     });
 
     if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`Failed to register (${res.status}) : ${text}`);
+      throw new Error("Erreur billets");
+    }
+
+    return await res.json();
+  }
+
+  // 📄 FETCH BILLET
+  static async fetchBilletById(id: number | string) {
+    const token = this.getToken();
+
+    const res = await fetch(`${API_BASE_URL}/billets/${id}`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      throw new Error("Erreur billet");
     }
 
     return await res.json();
