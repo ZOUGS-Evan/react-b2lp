@@ -1,10 +1,11 @@
-// Utilitaire d'authentification
 export function isLoggedIn(): boolean {
-  // TODO: vérifier si l'utilisateur est connecté
-  return false;
+  if (typeof window === "undefined") return false;
+
+  return localStorage.getItem("auth_token") !== null;
 }
 
 export function getAuthToken(): string | null {
-  // TODO: retourner le token d'authentification
-  return null;
+  if (typeof window === "undefined") return null;
+
+  return localStorage.getItem("auth_token");
 }
