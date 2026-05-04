@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { BilletService } from "../services/billetService";
 
 export default function Register() {
   const router = useRouter();
@@ -19,26 +20,10 @@ export default function Register() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name, email: mail, password }),
-      });
-
-      const data = await res.json();
-
-      // 🔴 stop si erreur backend
-      if (!res.ok) {
-        throw new Error(data.error || "Erreur lors de l'inscription");
-      }
-
-      // ✅ succès
+      await BilletService.register(name, mail, password);
       router.push("/login");
-
-    } catch (err: any) {
-      setError(err.message || "Erreur inconnue");
+    } catch (err) {
+      setError((err as Error).message);
     } finally {
       setLoading(false);
     }
@@ -47,6 +32,7 @@ export default function Register() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
 
+      {/* CARD SIMPLE */}
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 border border-purple-100 space-y-4"

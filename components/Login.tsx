@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { BilletService } from "@/services/billetService";
+
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,34 +17,15 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      await BilletService.login(email, password); 
 
-      const data = await res.json();
-
-      // 🔴 Si erreur backend → stop
-      if (!res.ok) {
-        throw new Error(data.error || "Erreur login");
-      }
-
-      // ✅ IMPORTANT : vérifier ce que renvoie ton API
-      if (!data.token && !data.user) {
-        throw new Error("Réponse invalide du serveur");
-      }
-
-      // ✅ stocker un vrai truc (token si possible)
-      localStorage.setItem("auth_token", data.token || email);
+      localStorage.setItem("auth_token", email);
 
       router.push("/");
       router.refresh();
 
-    } catch (err: any) {
-      alert(err.message || "Email ou mot de passe incorrect");
+    } catch (err) {
+      alert("Erreur login");
     } finally {
       setLoading(false);
     }
@@ -50,6 +33,8 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
+
+      {/* CARD SIMPLE */}
       <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 border border-purple-100">
 
         <h1 className="text-3xl font-bold text-center text-purple-700 mb-6">
@@ -83,6 +68,7 @@ export default function LoginPage() {
           </button>
 
         </form>
+
       </div>
     </div>
   );
