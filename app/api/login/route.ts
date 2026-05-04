@@ -1,18 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { API_BASE_URL, API_ENDPOINTS } from "../../../lib/api-config";
 
-/**
- * 🔥 Traduction erreurs Laravel → FR
- */
-function translateError(message: string): string {
-  const map: Record<string, string> = {
-    "The provided credentials are erroneous.": "Email ou mot de passe incorrect",
-    "The password field must be at least 8 characters.": "Mot de passe trop court (8 caractères minimum)",
-    "The email field is required.": "Email requis",
-    "The password field is required.": "Mot de passe requis",
-  };
+function extractToken(data: any): string | null {
+  if (!data) return null;
 
-  return map[message] || "Erreur de connexion";
+  // cas 1: string brute Laravel
+  if (typeof data === "string") return data;
+
+  // cas 2: auth_token
+  if (data.auth_token) return data.auth_token;
+
+  // cas 3: object weird
+  if (typeof data === "object") {
+    return data.token || data.access_token || null;
+  }
+
+  return null;
 }
 
 export async function POST(request: NextRequest) {
@@ -28,48 +31,53 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(body),
     });
 
-    const data = await res.json().catch(() => null);
+    const text = await res.text();
 
-    // ❌ ERREUR BACKEND
+    let data: any;
+
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = text; // Laravel renvoie parfois string brute
+    }
+
     if (!res.ok) {
-      const rawMessage =
-        data?.message ||
-        (data?.errors &&
-          Object.values(data.errors).flat()[0]) ||
-        "Erreur inconnue";
-
       return NextResponse.json(
         {
           success: false,
-          message: translateError(rawMessage),
+          message:
+            data?.message ||
+            (data?.errors &&
+              Object.values(data.errors).flat()[0]) ||
+            "Erreur de connexion",
         },
         { status: res.status }
       );
     }
 
-    const token = data?.auth_token || data?.trim?.() || data;
+    const token = extractToken(data);
 
-    if (!token) {
+    if (!token || typeof token !== "string") {
       return NextResponse.json(
         {
           success: false,
-          message: "Token invalide",
+          message: "Token invalide reçu du serveur",
+          debug: data, // utile pour debug
         },
         { status: 401 }
       );
     }
 
-    // ✅ SUCCESS CLEAN
     return NextResponse.json({
       success: true,
-      auth_token: token,
+      auth_token: token.trim(),
     });
 
   } catch (error) {
     return NextResponse.json(
       {
         success: false,
-        message: "Erreur serveur",
+        message: "Erreur serveur login",
       },
       { status: 500 }
     );
