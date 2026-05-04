@@ -21,10 +21,13 @@ export default function LoginPage() {
     try {
       await BilletService.login(email, password);
 
-      router.push("/");
-      router.refresh();
+      // 🔥 important refresh global UI
+      window.location.href = "/";
 
     } catch (err) {
+      // ❌ sécurité : on supprime tout token possible
+      localStorage.removeItem("auth_token");
+
       setError((err as Error).message);
     } finally {
       setLoading(false);
@@ -32,44 +35,40 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white px-4">
-      <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 border border-purple-100">
+    <div className="min-h-screen flex items-center justify-center">
 
-        <h1 className="text-3xl font-bold text-center text-purple-700 mb-6">
-          Connexion
-        </h1>
+      <form onSubmit={handleLogin} className="w-full max-w-md p-8 border rounded-xl">
+
+        <h1 className="text-2xl mb-4">Connexion</h1>
 
         {error && (
-          <p className="text-red-500 text-sm mb-3">{error}</p>
+          <p className="text-red-500 text-sm mb-2">{error}</p>
         )}
 
-        <form onSubmit={handleLogin} className="flex flex-col gap-4">
+        <input
+          type="email"
+          placeholder="Email"
+          className="w-full p-3 border mb-3"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="px-4 py-3 border rounded-xl"
-          />
+        <input
+          type="password"
+          placeholder="Mot de passe"
+          className="w-full p-3 border mb-3"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-          <input
-            type="password"
-            placeholder="Mot de passe"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="px-4 py-3 border rounded-xl"
-          />
+        <button
+          disabled={loading}
+          className="w-full bg-purple-600 text-white p-3 rounded-xl"
+        >
+          {loading ? "Connexion..." : "Se connecter"}
+        </button>
 
-          <button
-            disabled={loading}
-            className="bg-purple-600 text-white py-3 rounded-xl"
-          >
-            {loading ? "Connexion..." : "Se connecter"}
-          </button>
-
-        </form>
-      </div>
+      </form>
     </div>
   );
 }

@@ -1,8 +1,7 @@
-import { API_BASE_URL } from "../lib/api-config";
+import { API_BASE_URL, API_ENDPOINTS } from "../lib/api-config";
 
 export class BilletService {
 
-  // 🔑 LOGIN (token texte)
   static async login(email: string, password: string) {
     const res = await fetch("/api/login", {
       method: "POST",
@@ -12,26 +11,19 @@ export class BilletService {
       body: JSON.stringify({ email, password }),
     });
 
-    const text = await res.text();
+    const data = await res.json();
 
     if (!res.ok) {
-      throw new Error(text || "Erreur login");
+      throw new Error(data.message || "Login incorrect");
     }
 
-    const token = text.trim();
+    localStorage.setItem("auth_token", data.auth_token);
 
-    if (!token) {
-      throw new Error("Token invalide");
-    }
-
-    localStorage.setItem("auth_token", token);
-
-    return token;
+    return data.auth_token;
   }
 
-  // 📝 REGISTER
   static async register(name: string, email: string, password: string) {
-    const res = await fetch("/api/register", {
+    const res = await fetch(`${API_BASE_URL}${API_ENDPOINTS.register}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -39,14 +31,7 @@ export class BilletService {
       body: JSON.stringify({ name, email, password }),
     });
 
-    const text = await res.text();
-
-    let data;
-    try {
-      data = JSON.parse(text);
-    } catch {
-      data = { message: text };
-    }
+    const data = await res.json();
 
     if (!res.ok) {
       throw new Error(data.message || "Erreur inscription");
@@ -55,51 +40,43 @@ export class BilletService {
     return data;
   }
 
-  // 🔐 TOKEN
-  static getToken() {
-    return localStorage.getItem("auth_token");
-  }
-
-  // 🚪 LOGOUT
   static logout() {
     localStorage.removeItem("auth_token");
   }
 
-  // 📄 FETCH BILLETS
-  static async fetchBillets() {
-    const token = this.getToken();
+  static getToken() {
+    return localStorage.getItem("auth_token");
+  }
 
-    const res = await fetch(`${API_BASE_URL}/billets`, {
+  static async fetchBillets() {
+    const res = await fetch(`${API_BASE_URL}${API_ENDPOINTS.billets}`, {
       headers: {
-        "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
+        Authorization: `Bearer ${this.getToken()}`,
       },
-      cache: "no-store",
     });
+
+    const data = await res.json();
 
     if (!res.ok) {
       throw new Error("Erreur billets");
     }
 
-    return await res.json();
+    return data;
   }
 
-  // 📄 FETCH BILLET
-  static async fetchBilletById(id: number | string) {
-    const token = this.getToken();
-
-    const res = await fetch(`${API_BASE_URL}/billets/${id}`, {
+  static async fetchBilletById(id: string | number) {
+    const res = await fetch(`${API_BASE_URL}${API_ENDPOINTS.billet(id)}`, {
       headers: {
-        "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
+        Authorization: `Bearer ${this.getToken()}`,
       },
-      cache: "no-store",
     });
+
+    const data = await res.json();
 
     if (!res.ok) {
       throw new Error("Erreur billet");
     }
 
-    return await res.json();
+    return data;
   }
 }

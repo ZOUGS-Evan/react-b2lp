@@ -32,52 +32,44 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white px-4">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 border border-purple-100 space-y-4"
-      >
+    <div className="min-h-screen flex items-center justify-center">
 
-        <h2 className="text-3xl text-center text-purple-700">
-          Inscription
-        </h2>
+      <form onSubmit={handleSubmit} className="w-full max-w-md p-8 border rounded-xl">
 
-        {error && (
-          <p className="text-red-500 text-sm">{error}</p>
-        )}
+        <h1 className="text-2xl mb-4">Inscription</h1>
+
+        {error && <p className="text-red-500">{error}</p>}
 
         <input
           type="text"
           placeholder="Nom"
+          className="w-full p-3 border mb-3"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full p-3 border rounded-xl"
         />
 
         <input
           type="email"
           placeholder="Email"
+          className="w-full p-3 border mb-3"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-3 border rounded-xl"
         />
 
         <input
           type="password"
           placeholder="Mot de passe"
+          className="w-full p-3 border mb-3"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-3 border rounded-xl"
         />
 
-        <button
-          disabled={loading}
-          className="w-full bg-purple-600 text-white p-3 rounded-xl"
-        >
-          {loading ? "Création..." : "Créer un compte"}
+        <button className="w-full bg-purple-600 text-white p-3 rounded-xl">
+          Créer un compte
         </button>
 
       </form>
+
     </div>
   );
 }

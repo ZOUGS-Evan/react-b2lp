@@ -1,28 +1,48 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { API_BASE_URL, API_ENDPOINTS } from "../../../lib/api-config";
 
-export async function POST(req: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const body = await req.json();
+    const body = await request.json();
 
-    const res = await fetch("https://evanzougs.fr/b2lp/api/login", {
+    const res = await fetch(`${API_BASE_URL}${API_ENDPOINTS.login}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Accept": "application/json",
       },
       body: JSON.stringify(body),
     });
 
     const text = await res.text();
 
-    return new NextResponse(text, {
-      status: res.status,
-    });
+    // ❌ login refusé backend
+    if (!res.ok) {
+      return NextResponse.json(
+        { message: text || "Email ou mot de passe incorrect" },
+        { status: res.status }
+      );
+    }
+
+    const token = text.trim();
+
+    // ❌ validation token Laravel Sanctum
+    if (!token || !token.includes("|")) {
+      return NextResponse.json(
+        { message: "Token invalide reçu du serveur" },
+        { status: 401 }
+      );
+    }
+
+    // ✅ réponse propre frontend
+    return NextResponse.json(
+      { auth_token: token },
+      { status: 200 }
+    );
 
   } catch (error) {
-    console.error("LOGIN PROXY ERROR:", error);
-
     return NextResponse.json(
-      { message: "Erreur proxy login" },
+      { message: "Erreur serveur login" },
       { status: 500 }
     );
   }
